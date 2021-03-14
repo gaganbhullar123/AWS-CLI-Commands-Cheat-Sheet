@@ -1,0 +1,38 @@
+1. Curl command (cURL: Client URL)
+   curl command is used to transfer data to or from a server. There are many protocols
+supported by this command HTTP,HTTPS.....
+
+
+https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/#:~:text=The%20most%20used%20command%20to,variables%2C%20one%20variable%20per%20line.
+
+The above link explains the difference between environment variables and shell variables.
+
+Using curl command how to set the availability zone which is AZ(environment variable) and AWS_DEFAULT_REGION(environmet variable).
+
+2. # Set the Region
+AZ=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
+export AWS_DEFAULT_REGION=${AZ::-1}
+
+In the above command the curl command is inside the backtick(`) which means the content inside will run as a command and then the result will be 
+assigned to AZ and also export command is used to assign the values to environment variable. In AZ the last letter is truncated.
+For Example if the AZ is ap-southeast-2a. Then, the region would be ap-southeast-2.
+
+
+3. # Obtain the Linux AMI
+AMI=$(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --query 'Parameters[0].[Value]' --output text)
+echo $AMI
+ssm is aws system manager
+Remember: This command will not work If the region is not set. So make sure the region is set using command in step 2.
+Also to run the command the shell must be configured using aws configure command.
+
+4. # Obtain a subnet
+SUBNET=$(aws ec2 describe-subnets --filters 'Name=tag:Name,Values=Mysubnet1' --query Subnets[].SubnetId --output text)
+echo $SUBNET
+
+The above command is used to obtain the subnet id. 
+--filters is used to filter the result based on the value provided. For example in this case subnet id for Mysubnet1 is searched.
+
+5. # Obtain the security group to use.
+SG=$(aws ec2 describe-security-groups --filters Name=group-name,Values=MySecurityGroup --query SecurityGroups[].GroupId --output text)
+echo $SG
+The above command is used to get the security group.
