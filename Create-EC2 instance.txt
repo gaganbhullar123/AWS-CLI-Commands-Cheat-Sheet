@@ -36,3 +36,44 @@ The above command is used to obtain the subnet id.
 SG=$(aws ec2 describe-security-groups --filters Name=group-name,Values=MySecurityGroup --query SecurityGroups[].GroupId --output text)
 echo $SG
 The above command is used to get the security group.
+
+
+6. Create an instance
+INSTANCE=$(\
+aws ec2 run-instances \
+--image-id $AMI \
+--subnet-id $SUBNET \
+--security-group-ids $SG \
+--user-data file:///home/ec2-user/UserData.txt \
+--instance-type t3.micro \
+--tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Web Server}]' \
+--query 'Instances[*].InstanceId' \
+--output text \
+)
+echo $INSTANCE
+
+
+Image: 	AMI Value obtained from the parameter store
+
+Subnet: Subnet in which EC2 instance is to be launched
+
+Security Group: The security group to be attached to an instance.
+
+User Data: User data script which is used to install web application.
+
+Instance Type: TYpe of instance to be launched.
+
+Tags: Name tag with value of your choice attached to an instance.
+
+Output: Output options could be json, table or text
+
+
+7. Check the State of the Instance if it is running
+
+aws ec2 describe-instances --instance-ids $INSTANCE
+
+All information of the instance will be displayed in json format.
+
+aws ec2 describe-instances --instance-ids $INSTANCE --query 'Reservations[].Instances[].State.Name' --output text
+
+The above statement is used to display the status of the instance.
